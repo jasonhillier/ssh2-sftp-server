@@ -5,6 +5,8 @@ const execFile = require('child_process').execFile;
 
 
 const getLogicalDisks = async () => {
+  return ['/'];
+  /*
   let logicaldisk = await new Promise((resolve, reject) => {
     execFile('wmic', ['logicaldisk', 'get', 'caption'], (err, body) => {
       if(err)
@@ -13,6 +15,7 @@ const getLogicalDisks = async () => {
     });
   });
   return logicaldisk.split("\n").map(l => l.trim()).splice(1).filter(Boolean);
+  */
 };
 
 function wslpath(winpath) {
@@ -36,8 +39,8 @@ function winpath(wslpath) {
     return '/';
 
   var sepa = wslpath.split(path.posix.sep).slice(1);
-  let drive = sepa.shift().toUpperCase() + ':\\';
-  let newP = drive + sepa.join(path.win32.sep);
+  //let drive = sepa.shift().toUpperCase() + ':\\';
+  let newP = '/' + sepa.join(path.posix.sep);
   return newP;
 }
 

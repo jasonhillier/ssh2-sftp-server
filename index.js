@@ -22,12 +22,16 @@ function pathLocalToRemote(localpath) {
   return wslpath(localpath);
 }
 
+function pathRemoteToLocalExt(homeDir,remotepath) {
+  return 'stage/' + homeDir + winpath(remotepath);
+}
 
-const logger = {
+
+const logger = console; /*{
   debug : debug('sftp:debug'),
   info  : debug('sftp:info'),
   error : debug('sftp:error')
-};
+};*/
 
 
 const errorCode = (code) => {
@@ -74,7 +78,7 @@ const modeLinux = (filename, filepath) => {
 
 class SFTP {
 
-  constructor(sftpStream) {
+  constructor(sftpStream, homeDir) {
 
     ({flagsToString} = sftpStream.constructor);
     ({OPEN_MODE : SFTP_OPEN_MODE, STATUS_CODE : SFTP_STATUS_CODE} = sftpStream.constructor);
@@ -82,6 +86,14 @@ class SFTP {
     this.openFiles = {};
     this._handleCount = 0;
     this.sftpStream = sftpStream;
+    this.homeDir = homeDir;
+
+    //make home dir for user, if needed
+    try
+    {
+      fs.mkdirSync('stage/' + homeDir);
+    } catch(err) {}
+
 
     sftpStream.on('OPEN', this._open.bind(this));
     sftpStream.on('CLOSE', this._close.bind(this));
@@ -124,7 +136,7 @@ class SFTP {
   }
 
   _onSTAT(statType, reqid, remotepath, handle) {
-    let filepath = pathRemoteToLocal(remotepath);
+    let filepath = pathRemoteToLocalExt(this.homeDir,remotepath);
     logger.info('STAT', {filepath, remotepath, statType, handle});
     try {
       var fstats = fs[statType](filepath);
@@ -141,7 +153,7 @@ class SFTP {
 
   _opendir(reqid, remotepath) {
 
-    let filepath = pathRemoteToLocal(remotepath);
+    let filepath = pathRemoteToLocalExt(this.homeDir,remotepath);
     logger.info('OPENDIR', {reqid, filepath, remotepath});
 
     try {
@@ -177,8 +189,8 @@ class SFTP {
 
 
   _rename(reqid, remotepath, newremotePath) {
-    let filepath = pathRemoteToLocal(remotepath);
-    let newfilepath = pathRemoteToLocal(newremotePath);
+    let filepath = pathRemoteToLocalExt(this.homeDir,remotepath);
+    let newfilepath = pathRemoteToLocalExt(this.homeDir,newremotePath);
     logger.info('RENAME', {filepath, remotepath, newfilepath, newremotePath});
     fs.renameSync(filepath, newfilepath);
     this.sftpStream.status(reqid, SFTP_STATUS_CODE.OK);
@@ -186,21 +198,21 @@ class SFTP {
 
 
   _remove(reqid, remotepath) {
-    let filepath = pathRemoteToLocal(remotepath);
+    let filepath = pathRemoteToLocalExt(this.homeDir,remotepath);
     logger.info('REMOVE', {filepath, remotepath});
     fs.unlinkSync(filepath);
     this.sftpStream.status(reqid, SFTP_STATUS_CODE.OK);
   }
 
   _rmdir(reqid, remotepath) {
-    let filepath = pathRemoteToLocal(remotepath);
+    let filepath = pathRemoteToLocalExt(this.homeDir,remotepath);
     logger.info('RMDIR', {filepath, remotepath});
     fs.rmdirSync(filepath);
     this.sftpStream.status(reqid, SFTP_STATUS_CODE.OK);
   }
 
   _mkdir(reqid, remotepath /*, attrs*/) {
-    let filepath = pathRemoteToLocal(remotepath);
+    let filepath = pathRemoteToLocalExt(this.homeDir,remotepath);
     fs.mkdirSync(filepath);
     this.sftpStream.status(reqid, SFTP_STATUS_CODE.OK);
   }
@@ -228,7 +240,7 @@ class SFTP {
   }
 
   _open(reqid, filepath, flags, attrs) {
-    filepath = pathRemoteToLocal(filepath);
+    filepath = pathRemoteToLocalExt(this.homeDir,filepath);
     flags  = flagsToString(flags);
 
     logger.info('OPEN', {reqid, filepath, flags, attrs});

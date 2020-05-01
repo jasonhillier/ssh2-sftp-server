@@ -1,5 +1,5 @@
 {
-  "name": "ssh2-sftp-server",
+  "name": "ssh2-sftp-server-linux",
   "version": "1.1.0",
   "description": "SSH2 sftp server",
   "main": "sftp.js",
@@ -31,14 +31,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/idjem/ssh2-sftp-server.git"
+    "url": "git+https://github.com/jasonhillier/ssh2-sftp-server.git"
   },
   "keywords": [
     "SSH2",
     "sftp"
   ],
   "bugs": {
-    "url": "https://github.com/idjem/ssh2-sftp-server/issues"
+    "url": "https://github.com/jasonhillier/ssh2-sftp-server/issues"
   },
-  "homepage": "https://github.com/idjem/ssh2-sftp-server#readme"
+  "homepage": "https://github.com/jasonhillier/ssh2-sftp-server#readme"
 }
